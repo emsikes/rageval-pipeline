@@ -1,0 +1,32 @@
+[project]
+name = "rageval"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Matt Sikes", email = "emsikes@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "litellm>=1.104.1",
+    "pydantic>=2.13.5",
+]
+
+[project.scripts]
+rageval = "rageval:main"
+
+[build-system]
+requires = ["uv_build>=0.9.5,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.10",
+]
+examples = [
+    "beautifulsoup4>=4.15.0",
+    "httpx>=0.28.1",
+    "numpy>=2.5.3",
+    "rank-bm25>=0.2.2",
+]
