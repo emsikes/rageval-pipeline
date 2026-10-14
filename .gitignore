@@ -204,6 +204,7 @@ cython_debug/
 # .vscode/
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
+.vscode
 
 # Ruff stuff:
 .ruff_cache/
@@ -221,3 +222,6 @@ __marimo__/
 
 # Data
 data/
+
+# Documentation
+docs/

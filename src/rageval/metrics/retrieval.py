@@ -3,19 +3,23 @@ from rageval.schema import RelevantContext, RetrievedChunk
 import math
 
 
-def is_match(chunk: RetrievedChunk, label: RelevantContext) -> bool:
-    """
-    Return True if a retrieved chunk covers a ground truth context.
+def is_match(
+    chunk: RetrievedChunk, label: RelevantContext, min_overlap: float = 0.5
+) -> bool:
+    """Return True if a retrieved chunk covers a ground-truth context.
 
-    Match order: chunk_id if both have one, then span overlap, else
-    a doc level match when the label as no span or chunk_id.
+    Match order: chunk_id if both have one, then span overlap of at least
+    min_overlap of the shorter span, else a doc-level match when the label
+    has no span or chunk_id.
     """
     if chunk.doc_id != label.doc_id:
         return False
     if chunk.chunk_id and label.chunk_id:
         return chunk.chunk_id == label.chunk_id
     if chunk.span and label.span:
-        return chunk.span[0] < label.span[1] and label.span[0] < chunk.span[1]
+        overlap = min(chunk.span[1], label.span[1]) - max(chunk.span[0], label.span[0])
+        shorter = min(chunk.span[1] - chunk.span[0], label.span[1] - label.span[0])
+        return overlap >= min_overlap * shorter
     return label.span is None and label.chunk_id is None
 
 def relevance_grades(
@@ -35,7 +39,7 @@ def hit_at_k(grades: list[int], k: int) -> float:
     """Return 1.0 if any of the top k chunks is relevant, else 0.0."""
     return float(any(grades[:k]))
 
-def prevision_at_k(grades: list[int], k: int) -> float:
+def precision_at_k(grades: list[int], k: int) -> float:
     """Return the fraction of the top k slots filled by relevant chunks."""
     return sum(1 for g in grades[:k] if g > 0) / k
 
@@ -58,7 +62,7 @@ def reciprocal_rank(grades: list[int]) -> float:
     for rank, grade in enumerate(grades, start=1):
         if grade > 0:
             return 1 / rank
-        return 0.0
+    return 0.0
 
 def ndcg_at_k(grades: list[int], labels: list[RelevantContext], k: int) -> float:
     """
